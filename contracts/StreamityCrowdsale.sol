@@ -111,7 +111,7 @@ contract StreamityCrowdsale is Pauseble
     */
     function startCrowd(uint256 _tokens, uint _startDate, uint _endDate, uint8 _discount, uint8 _discountFirstDayICO) public onlyOwner
     {
-        require(_tokens * DEC >= avaliableSupply);  // require to set correct tokens value for crowd
+        require(_tokens * DEC <= avaliableSupply);  // require to set correct tokens value for crowd
         startIcoDate = _startDate;
         ICO = Ico (_tokens * DEC, _startDate, _startDate + _endDate * 1 days , _discount, _discountFirstDayICO);
         stage += 1;
