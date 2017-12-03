@@ -471,12 +471,13 @@ contract StreamityCrowdsale is Pauseble
     *
     * @param _tokens - How much tokens will have the crowdsale - amount humanlike value (10000)
     * @param _startDate - When crowdsale will be start - unix timestamp (1512231703 )
-    * @param _endDate - When crowdsale will be end - humanlive value (7) same as 7 days
-    * @param _discount - Discount for the crowd - humanlive value (7) same as 7 days
-    * @param _discount - Discount for the crowds first day - humanlive value (7) same as 7 days
+    * @param _endDate - When crowdsale will be end - humanlike value (7) same as 7 days
+    * @param _discount - Discount for the crowd - humanlive value (7) same as 7 %
+    * @param _discount - Discount for the crowds first day - humanlive value (7) same as 7 %
     */
     function startCrowd(uint256 _tokens, uint _startDate, uint _endDate, uint8 _discount, uint8 _discountFirstDayICO) public onlyOwner
     {
+        require(_tokens * DEC >= avaliableSupply);  // require to set correct tokens value for crowd
         startIcoDate = _startDate;
         ICO = Ico (_tokens * DEC, _startDate, _startDate + _endDate * 1 days , _discount, _discountFirstDayICO);
         stage += 1;
