@@ -1,5 +1,8 @@
 pragma solidity ^0.4.4;
 
+import "truffle/Assert.sol";
+import "truffle/DeployedAddresses.sol";
+
 /*
  *   sell() func. test for < uint256 _amount = (amount.mul(DEC)).div(buyPrice); >
  */
@@ -17,14 +20,14 @@ contract TestSellFunction {
         uint256 bp = 1 ether;
 
     /* sellAmountStep - simulate decrease users amount (msg.value) when buyPrice is 1 ether */
-    function sellAmountStep() public
+    function sellAmountStep() public view
         returns (uint256, uint256, uint256, uint256, uint256)
     {
         uint256 _amount1 = e * DEC / (bp);
-         uint256 _amount2 = e10 * DEC/ (bp);
-          uint256 _amount3 = e100 * DEC/ (bp);
+         uint256 _amount2 = e10 * DEC / (bp);
+          uint256 _amount3 = e100 * DEC / (bp);
            uint256 _amount4 = e1000 * DEC / (bp);
-            uint256 _amount5 = e10000 * DEC/ (bp);
+            uint256 _amount5 = e10000 * DEC / (bp);
 
         return (_amount1, _amount2, _amount3, _amount4, _amount5);
     }
@@ -32,14 +35,14 @@ contract TestSellFunction {
     uint256 public price = 1 * DEC / 2000;
 
     /* sellPriceStep - simulate decrease users amount (msg.value) when buyPrice less then 1 ether */
-    function sellPriceStep() public
+    function sellPriceStep() public view
         returns (uint256, uint256, uint256, uint256, uint256)
     {
         uint256 _amount1 = e * DEC / (price);
-         uint256 _amount2 = e10 * DEC/ (price);
-          uint256 _amount3 = e100 * DEC/ (price);
+         uint256 _amount2 = e10 * DEC / (price);
+          uint256 _amount3 = e100 * DEC / (price);
            uint256 _amount4 = e1000 * DEC / (price);
-            uint256 _amount5 = e10000 * DEC/ (price);
+            uint256 _amount5 = e10000 * DEC / (price);
 
         return (_amount1, _amount2, _amount3, _amount4, _amount5);
     }
@@ -47,14 +50,14 @@ contract TestSellFunction {
     uint256 public price2 = 2 * 1 ether;
 
     /* sellPriceStep2 - simulate decrease users amount (msg.value) when buyPrice more then 1 ether */
-    function sellPriceStep2() public
+    function sellPriceStep2() public view
         returns (uint256, uint256, uint256, uint256, uint256)
     {
         uint256 _amount1 = e * DEC / (price2);
-         uint256 _amount2 = e10 * DEC/ (price2);
-          uint256 _amount3 = e100 * DEC/ (price2);
+         uint256 _amount2 = e10 * DEC / (price2);
+          uint256 _amount3 = e100 * DEC / (price2);
            uint256 _amount4 = e1000 * DEC / (price2);
-            uint256 _amount5 = e10000 * DEC/ (price2);
+            uint256 _amount5 = e10000 * DEC / (price2);
 
         return (_amount1, _amount2, _amount3, _amount4, _amount5);
     }

@@ -1,4 +1,5 @@
 pragma solidity ^0.4.18;
+
 import "./TokenERC20.sol";
 
 contract ERC20Extending is TokenERC20
