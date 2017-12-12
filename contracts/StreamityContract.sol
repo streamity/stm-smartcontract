@@ -4,23 +4,27 @@ import "./StreamityCrowdsale.sol";
 
 contract StreamityContract is ERC20Extending, StreamityCrowdsale
 {
+    using SafeMath for uint;
+
+    uint public weisRaised;  // how many weis was raised on crowdsale
+
     function StreamityContract() public TokenERC20(130000000, "Streamity", "STM") {} //change before send !!!
 
     /**
     * Function payments handler
     *
     */
-    function () public payable
+    function() public payable
     {
-        assert(msg.value >= 1 ether / 10);
+        assert(msg.value >= 1 ether / 10 && msg.value <= 100 * 1 ether);
         require(now >= ICO.startDate);
 
         if (now > ICO.endDate) {
-          pauseInternal();
-          CrowdSaleFinished(crowdSaleStatus());
+            pauseInternal();
+            CrowdSaleFinished(crowdSaleStatus());
         }
 
-        if (0 != startIcoDate){
+        if (0 != startIcoDate) {
             if (now < startIcoDate) {
                 revert();
             } else {
@@ -29,5 +33,7 @@ contract StreamityContract is ERC20Extending, StreamityCrowdsale
         }
 
         sell(msg.sender, msg.value);
+
+        weisRaised = weisRaised.add(msg.value);
     }
 }

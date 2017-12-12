@@ -16,9 +16,6 @@ contract TokenERC20 is Ownable
     string public symbol;
     uint256 public decimals = 18;
     uint256 DEC = 10 ** uint256(decimals);
-    address public owner;
-
-    // 18 decimals is the strongly suggested default, avoid changing it
     uint256 public totalSupply;
     uint256 public avaliableSupply;
     uint256 public buyPrice = 1000000000000000000 wei;
@@ -43,12 +40,11 @@ contract TokenERC20 is Ownable
         string tokenSymbol
     ) public
     {
-        totalSupply = initialSupply * DEC;  // Update total supply with the decimal amount
-        balanceOf[this] = totalSupply;                // Give the creator all initial tokens
-        avaliableSupply = balanceOf[this];            // Show how much tokens on contract
-        name = tokenName;                                   // Set the name for display purposes
-        symbol = tokenSymbol;                               // Set the symbol for display purposes
-        owner = msg.sender;
+        totalSupply = initialSupply.mul(DEC);  // Update total supply with the decimal amount
+        balanceOf[this] = totalSupply;         // Give the creator all initial tokens
+        avaliableSupply = balanceOf[this];     // Show how much tokens on contract
+        name = tokenName;                      // Set the name for display purposes
+        symbol = tokenSymbol;                  // Set the symbol for display purposes
     }
 
     /**
@@ -65,17 +61,17 @@ contract TokenERC20 is Ownable
         // Check if the sender has enough
         require(balanceOf[_from] >= _value);
         // Check for overflows
-        require(balanceOf[_to] + _value > balanceOf[_to]);
+        require(balanceOf[_to].add(_value) > balanceOf[_to]);
         // Save this for an assertion in the future
-        uint previousBalances = balanceOf[_from] + balanceOf[_to];
+        uint previousBalances = balanceOf[_from].add(balanceOf[_to]);
         // Subtract from the sender
-        balanceOf[_from] -= _value;
+        balanceOf[_from] = balanceOf[_from].sub(_value);
         // Add the same to the recipient
-        balanceOf[_to] += _value;
+        balanceOf[_to] = balanceOf[_to].add(_value);
 
         Transfer(_from, _to, _value);
         // Asserts are used to use static analysis to find bugs in your code. They should never fail
-        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+        assert(balanceOf[_from].add(balanceOf[_to]) == previousBalances);
     }
 
     /**
@@ -105,7 +101,7 @@ contract TokenERC20 is Ownable
     {
         require(_value <= allowance[_from][msg.sender]);     // Check allowance
 
-        allowance[_from][msg.sender] -= _value;
+        allowance[_from][msg.sender] = allowance[_from][msg.sender].sub(_value);
         _transfer(_from, _to, _value);
 
         return true;
@@ -192,9 +188,9 @@ contract TokenERC20 is Ownable
     {
         require(balanceOf[msg.sender] >= _value);   // Check if the sender has enough
 
-        balanceOf[msg.sender] -= _value;            // Subtract from the sender
-        totalSupply -= _value;                      // Updates totalSupply
-        avaliableSupply -= _value;
+        balanceOf[msg.sender] = balanceOf[msg.sender].sub(_value);  // Subtract from the sender
+        totalSupply = totalSupply.sub(_value);                      // Updates totalSupply
+        avaliableSupply = avaliableSupply.sub(_value);
 
         Burn(msg.sender, _value);
 
@@ -215,10 +211,10 @@ contract TokenERC20 is Ownable
         require(balanceOf[_from] >= _value);                // Check if the targeted balance is enough
         require(_value <= allowance[_from][msg.sender]);    // Check allowance
 
-        balanceOf[_from] -= _value;                         // Subtract from the targeted balance
-        allowance[_from][msg.sender] -= _value;             // Subtract from the sender's allowance
-        totalSupply -= _value;                              // Update totalSupply
-        avaliableSupply -= _value;
+        balanceOf[_from] = balanceOf[_from].sub(_value);    // Subtract from the targeted balance
+        allowance[_from][msg.sender] = allowance[_from][msg.sender].sub(_value);    // Subtract from the sender's allowance
+        totalSupply = totalSupply.sub(_value);              // Update totalSupply
+        avaliableSupply = avaliableSupply.sub(_value);
 
         Burn(_from, _value);
 

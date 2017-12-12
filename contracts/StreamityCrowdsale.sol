@@ -11,11 +11,11 @@ contract StreamityCrowdsale is Pauseble
     event CrowdSaleFinished(string info);
 
     struct Ico {
-        uint256 tokens; // Tokens in crowdsale
-        uint startDate; // Date when crowsale will be starting, after its starting that property will be the 0
-        uint endDate; // Date when crowdsale will be stop
-        uint8 discount; // Discount
-        uint8 discountFirstDayICO; // Discount. Only for first stage ico
+        uint256 tokens;             // Tokens in crowdsale
+        uint startDate;             // Date when crowsale will be starting, after its starting that property will be the 0
+        uint endDate;               // Date when crowdsale will be stop
+        uint8 discount;             // Discount
+        uint8 discountFirstDayICO;  // Discount. Only for first stage ico
     }
 
     Ico public ICO;
@@ -34,7 +34,7 @@ contract StreamityCrowdsale is Pauseble
         if (_numerator == 0) _numerator = 1;
         if (_denominator == 0) _denominator = 1;
 
-        buyPrice = (_numerator * 1 * DEC) / _denominator;
+        buyPrice = (_numerator.mul(DEC)).div(_denominator);
 
         return true;
     }
@@ -65,7 +65,7 @@ contract StreamityCrowdsale is Pauseble
     */
     function sell(address _investor, uint256 amount) internal
     {
-        uint256 _amount = (amount / buyPrice) * DEC;
+        uint256 _amount = (amount.mul(DEC)).div(buyPrice);
 
         if (1 == stage) {
             _amount = _amount.add(withDiscount(_amount, ICO.discount));
@@ -94,8 +94,8 @@ contract StreamityCrowdsale is Pauseble
             revert();
         }
 
-        ICO.tokens -= _amount;
-        avaliableSupply -= _amount;
+        ICO.tokens = ICO.tokens.sub(_amount);
+        avaliableSupply = avaliableSupply.sub(_amount);
 
         _transfer(this, _investor, _amount);
     }
@@ -114,7 +114,7 @@ contract StreamityCrowdsale is Pauseble
         require(_tokens * DEC <= avaliableSupply);  // require to set correct tokens value for crowd
         startIcoDate = _startDate;
         ICO = Ico (_tokens * DEC, _startDate, _startDate + _endDate * 1 days , _discount, _discountFirstDayICO);
-        stage += 1;
+        stage = stage.add(1);
         unpause();
     }
 
@@ -136,6 +136,6 @@ contract StreamityCrowdsale is Pauseble
     function withDiscount(uint256 _amount, uint _percent) internal pure
         returns (uint256)
     {
-        return ((_amount * _percent) / 100);
+        return (_amount.mul(_percent)).div(100);
     }
 }

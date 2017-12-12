@@ -3,6 +3,8 @@ import "./TokenERC20.sol";
 
 contract ERC20Extending is TokenERC20
 {
+    using SafeMath for uint;
+
     /**
     * Function for transfer ethereum from contract to any address
     *
@@ -20,7 +22,7 @@ contract ERC20Extending is TokenERC20
     */
     function transferTokensFromContract(address _to, uint256 _value) public onlyOwner
     {
-        avaliableSupply -= _value;
+        avaliableSupply = avaliableSupply.sub(_value);
         _transfer(this, _to, _value);
     }
 }

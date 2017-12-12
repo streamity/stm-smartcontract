@@ -47,7 +47,7 @@ library SafeMath
  */
 contract Ownable
 {
-    address public owner;
+    address owner;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
@@ -92,9 +92,6 @@ contract TokenERC20 is Ownable
     string public symbol;
     uint256 public decimals = 18;
     uint256 DEC = 10 ** uint256(decimals);
-    address public owner;
-
-    // 18 decimals is the strongly suggested default, avoid changing it
     uint256 public totalSupply;
     uint256 public avaliableSupply;
     uint256 public buyPrice = 1000000000000000000 wei;
@@ -119,12 +116,11 @@ contract TokenERC20 is Ownable
         string tokenSymbol
     ) public
     {
-        totalSupply = initialSupply * DEC;  // Update total supply with the decimal amount
-        balanceOf[this] = totalSupply;                // Give the creator all initial tokens
-        avaliableSupply = balanceOf[this];            // Show how much tokens on contract
-        name = tokenName;                                   // Set the name for display purposes
-        symbol = tokenSymbol;                               // Set the symbol for display purposes
-        owner = msg.sender;
+        totalSupply = initialSupply.mul(DEC);  // Update total supply with the decimal amount
+        balanceOf[this] = totalSupply;         // Give the creator all initial tokens
+        avaliableSupply = balanceOf[this];     // Show how much tokens on contract
+        name = tokenName;                      // Set the name for display purposes
+        symbol = tokenSymbol;                  // Set the symbol for display purposes
     }
 
     /**
@@ -141,17 +137,17 @@ contract TokenERC20 is Ownable
         // Check if the sender has enough
         require(balanceOf[_from] >= _value);
         // Check for overflows
-        require(balanceOf[_to] + _value > balanceOf[_to]);
+        require(balanceOf[_to].add(_value) > balanceOf[_to]);
         // Save this for an assertion in the future
-        uint previousBalances = balanceOf[_from] + balanceOf[_to];
+        uint previousBalances = balanceOf[_from].add(balanceOf[_to]);
         // Subtract from the sender
-        balanceOf[_from] -= _value;
+        balanceOf[_from] = balanceOf[_from].sub(_value);
         // Add the same to the recipient
-        balanceOf[_to] += _value;
+        balanceOf[_to] = balanceOf[_to].add(_value);
 
         Transfer(_from, _to, _value);
         // Asserts are used to use static analysis to find bugs in your code. They should never fail
-        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+        assert(balanceOf[_from].add(balanceOf[_to]) == previousBalances);
     }
 
     /**
@@ -181,7 +177,7 @@ contract TokenERC20 is Ownable
     {
         require(_value <= allowance[_from][msg.sender]);     // Check allowance
 
-        allowance[_from][msg.sender] -= _value;
+        allowance[_from][msg.sender] = allowance[_from][msg.sender].sub(_value);
         _transfer(_from, _to, _value);
 
         return true;
@@ -268,9 +264,9 @@ contract TokenERC20 is Ownable
     {
         require(balanceOf[msg.sender] >= _value);   // Check if the sender has enough
 
-        balanceOf[msg.sender] -= _value;            // Subtract from the sender
-        totalSupply -= _value;                      // Updates totalSupply
-        avaliableSupply -= _value;
+        balanceOf[msg.sender] = balanceOf[msg.sender].sub(_value);  // Subtract from the sender
+        totalSupply = totalSupply.sub(_value);                      // Updates totalSupply
+        avaliableSupply = avaliableSupply.sub(_value);
 
         Burn(msg.sender, _value);
 
@@ -291,10 +287,10 @@ contract TokenERC20 is Ownable
         require(balanceOf[_from] >= _value);                // Check if the targeted balance is enough
         require(_value <= allowance[_from][msg.sender]);    // Check allowance
 
-        balanceOf[_from] -= _value;                         // Subtract from the targeted balance
-        allowance[_from][msg.sender] -= _value;             // Subtract from the sender's allowance
-        totalSupply -= _value;                              // Update totalSupply
-        avaliableSupply -= _value;
+        balanceOf[_from] = balanceOf[_from].sub(_value);    // Subtract from the targeted balance
+        allowance[_from][msg.sender] = allowance[_from][msg.sender].sub(_value);    // Subtract from the sender's allowance
+        totalSupply = totalSupply.sub(_value);              // Update totalSupply
+        avaliableSupply = avaliableSupply.sub(_value);
 
         Burn(_from, _value);
 
@@ -346,6 +342,8 @@ contract Pauseble is TokenERC20
 
 contract ERC20Extending is TokenERC20
 {
+    using SafeMath for uint;
+
     /**
     * Function for transfer ethereum from contract to any address
     *
@@ -363,7 +361,7 @@ contract ERC20Extending is TokenERC20
     */
     function transferTokensFromContract(address _to, uint256 _value) public onlyOwner
     {
-        avaliableSupply -= _value;
+        avaliableSupply = avaliableSupply.sub(_value);
         _transfer(this, _to, _value);
     }
 }
@@ -377,11 +375,11 @@ contract StreamityCrowdsale is Pauseble
     event CrowdSaleFinished(string info);
 
     struct Ico {
-        uint256 tokens; // Tokens in crowdsale
-        uint startDate; // Date when crowsale will be starting, after its starting that property will be the 0
-        uint endDate; // Date when crowdsale will be stop
-        uint8 discount; // Discount
-        uint8 discountFirstDayICO; // Discount. Only for first stage ico
+        uint256 tokens;             // Tokens in crowdsale
+        uint startDate;             // Date when crowsale will be starting, after its starting that property will be the 0
+        uint endDate;               // Date when crowdsale will be stop
+        uint8 discount;             // Discount
+        uint8 discountFirstDayICO;  // Discount. Only for first stage ico
     }
 
     Ico public ICO;
@@ -400,7 +398,7 @@ contract StreamityCrowdsale is Pauseble
         if (_numerator == 0) _numerator = 1;
         if (_denominator == 0) _denominator = 1;
 
-        buyPrice = (_numerator * 1 * DEC) / _denominator;
+        buyPrice = (_numerator.mul(DEC)).div(_denominator);
 
         return true;
     }
@@ -431,7 +429,7 @@ contract StreamityCrowdsale is Pauseble
     */
     function sell(address _investor, uint256 amount) internal
     {
-        uint256 _amount = (amount / buyPrice) * DEC;
+        uint256 _amount = (amount.mul(DEC)).div(buyPrice);
 
         if (1 == stage) {
             _amount = _amount.add(withDiscount(_amount, ICO.discount));
@@ -460,8 +458,8 @@ contract StreamityCrowdsale is Pauseble
             revert();
         }
 
-        ICO.tokens -= _amount;
-        avaliableSupply -= _amount;
+        ICO.tokens = ICO.tokens.sub(_amount);
+        avaliableSupply = avaliableSupply.sub(_amount);
 
         _transfer(this, _investor, _amount);
     }
@@ -480,7 +478,7 @@ contract StreamityCrowdsale is Pauseble
         require(_tokens * DEC <= avaliableSupply);  // require to set correct tokens value for crowd
         startIcoDate = _startDate;
         ICO = Ico (_tokens * DEC, _startDate, _startDate + _endDate * 1 days , _discount, _discountFirstDayICO);
-        stage += 1;
+        stage = stage.add(1);
         unpause();
     }
 
@@ -502,29 +500,33 @@ contract StreamityCrowdsale is Pauseble
     function withDiscount(uint256 _amount, uint _percent) internal pure
         returns (uint256)
     {
-        return ((_amount * _percent) / 100);
+        return (_amount.mul(_percent)).div(100);
     }
 }
 
 contract StreamityContract is ERC20Extending, StreamityCrowdsale
 {
+    using SafeMath for uint;
+
+    uint public weisRaised;  // how many weis was raised on crowdsale
+
     function StreamityContract() public TokenERC20(130000000, "Streamity", "STM") {} //change before send !!!
 
     /**
     * Function payments handler
     *
     */
-    function () public payable
+    function() public payable
     {
-        assert(msg.value >= 1 ether / 10);
+        assert(msg.value >= 1 ether / 10 && msg.value <= 100 * 1 ether);
         require(now >= ICO.startDate);
 
         if (now > ICO.endDate) {
-          pauseInternal();
-          CrowdSaleFinished(crowdSaleStatus());
+            pauseInternal();
+            CrowdSaleFinished(crowdSaleStatus());
         }
 
-        if (0 != startIcoDate){
+        if (0 != startIcoDate) {
             if (now < startIcoDate) {
                 revert();
             } else {
@@ -533,5 +535,7 @@ contract StreamityContract is ERC20Extending, StreamityCrowdsale
         }
 
         sell(msg.sender, msg.value);
+
+        weisRaised = weisRaised.add(msg.value);
     }
 }
