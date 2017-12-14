@@ -516,9 +516,9 @@ contract StreamityContract is ERC20Extending, StreamityCrowdsale
     * Function payments handler
     *
     */
-    function() public payable
+    function () public payable
     {
-        assert(msg.value >= 1 ether / 10 && msg.value <= 100 * 1 ether);
+        assert(msg.value >= 1 ether / 10);
         require(now >= ICO.startDate);
 
         if (now > ICO.endDate) {
