@@ -308,34 +308,37 @@ contract Pauseble is TokenERC20
 
     modifier whenNotPaused()
     {
-      require(!paused);
-      _;
+        require(!paused);
+        _;
     }
 
     modifier whenPaused()
     {
-          require(paused);
+        require(paused);
         _;
     }
 
     function pause() public onlyOwner
     {
         paused = true;
-
         EPause();
     }
 
     function pauseInternal() internal
     {
         paused = true;
-
         EPause();
     }
 
     function unpause() public onlyOwner
     {
         paused = false;
+        EUnpause();
+    }
 
+    function unpauseInternal() internal
+    {
+        paused = false;
         EUnpause();
     }
 }
@@ -350,7 +353,7 @@ contract ERC20Extending is TokenERC20
     * @param _to - address of the recipient
     * @param amount - ethereum
     */
-    function transferEthFromContract(address _to, uint amount) public onlyOwner
+    function transferEthFromContract(address _to, uint256 amount) public onlyOwner
     {
         _to.transfer(amount);
     }
@@ -479,7 +482,7 @@ contract StreamityCrowdsale is Pauseble
         startIcoDate = _startDate;
         ICO = Ico (_tokens * DEC, _startDate, _startDate + _endDate * 1 days , _discount, _discountFirstDayICO);
         stage = stage.add(1);
-        unpause();
+        unpauseInternal();
     }
 
     /**
@@ -510,6 +513,7 @@ contract StreamityContract is ERC20Extending, StreamityCrowdsale
 
     uint public weisRaised;  // how many weis was raised on crowdsale
 
+    /* Streamity tokens Constructor */
     function StreamityContract() public TokenERC20(130000000, "Streamity", "STM") {} //change before send !!!
 
     /**
@@ -521,7 +525,7 @@ contract StreamityContract is ERC20Extending, StreamityCrowdsale
         assert(msg.value >= 1 ether / 10);
         require(now >= ICO.startDate);
 
-        if (now > ICO.endDate) {
+        if (now >= ICO.endDate) {
             pauseInternal();
             CrowdSaleFinished(crowdSaleStatus());
         }
@@ -534,8 +538,9 @@ contract StreamityContract is ERC20Extending, StreamityCrowdsale
             }
         }
 
-        sell(msg.sender, msg.value);
-
-        weisRaised = weisRaised.add(msg.value);
+        if (paused == false) {
+            sell(msg.sender, msg.value);
+            weisRaised = weisRaised.add(msg.value);
+        }
     }
 }

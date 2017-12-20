@@ -12,7 +12,7 @@ contract ERC20Extending is TokenERC20
     * @param _to - address of the recipient
     * @param amount - ethereum
     */
-    function transferEthFromContract(address _to, uint amount) public onlyOwner
+    function transferEthFromContract(address _to, uint256 amount) public onlyOwner
     {
         _to.transfer(amount);
     }
