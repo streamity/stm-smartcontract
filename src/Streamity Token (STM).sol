@@ -388,6 +388,17 @@ contract StreamityCrowdsale is Pauseble
     Ico public ICO;
 
     /**
+    * Function for change discount if need
+    *
+    */
+    function changeDiscount(uint8 _discount) public onlyOwner
+        returns (bool)
+    {
+        ICO = Ico (ICO.tokens, ICO.startDate, ICO.endDate, _discount, ICO.discountFirstDayICO);
+        return true;
+    }
+
+    /**
     * Expanding of the functionality
     *
     * @param _numerator - Numerator - value (10000)
