@@ -116,7 +116,7 @@ contract StreamityCrowdsale is Pauseble
         startIcoDate = _startDate;
         ICO = Ico (_tokens * DEC, _startDate, _startDate + _endDate * 1 days , _discount, _discountFirstDayICO);
         stage = stage.add(1);
-        unpause();
+        unpauseInternal();
     }
 
     /**
