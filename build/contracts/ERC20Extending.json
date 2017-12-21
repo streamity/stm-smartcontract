@@ -470,7 +470,7 @@
       },
       {
         "attributes": {
-          "SourceUnit": 1332,
+          "SourceUnit": 1386,
           "absolutePath": "/C/Users/pirno/Desktop/stm-smartcontract origina/contracts/TokenERC20.sol",
           "file": "./TokenERC20.sol",
           "scope": 48,
@@ -487,14 +487,14 @@
         "attributes": {
           "contractDependencies": [
             160,
-            1331
+            1385
           ],
           "contractKind": "contract",
           "documentation": null,
           "fullyImplemented": false,
           "linearizedBaseContracts": [
             47,
-            1331,
+            1385,
             160
           ],
           "name": "ERC20Extending",
@@ -512,7 +512,7 @@
                 "attributes": {
                   "contractScope": null,
                   "name": "TokenERC20",
-                  "referencedDeclaration": 1331,
+                  "referencedDeclaration": 1385,
                   "type": "contract TokenERC20"
                 },
                 "id": 3,
@@ -530,7 +530,7 @@
                 "attributes": {
                   "contractScope": null,
                   "name": "SafeMath",
-                  "referencedDeclaration": 336,
+                  "referencedDeclaration": 333,
                   "type": "library SafeMath"
                 },
                 "id": 5,
@@ -879,7 +879,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 812,
+                              "referencedDeclaration": 866,
                               "type": "uint256",
                               "value": "avaliableSupply"
                             },
@@ -915,7 +915,7 @@
                                   "isPure": false,
                                   "lValueRequested": false,
                                   "member_name": "sub",
-                                  "referencedDeclaration": 311,
+                                  "referencedDeclaration": 308,
                                   "type": "function (uint256,uint256) pure returns (uint256)"
                                 },
                                 "children": [
@@ -925,7 +925,7 @@
                                       "overloadedDeclarations": [
                                         null
                                       ],
-                                      "referencedDeclaration": 812,
+                                      "referencedDeclaration": 866,
                                       "type": "uint256",
                                       "value": "avaliableSupply"
                                     },
@@ -1003,7 +1003,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 973,
+                              "referencedDeclaration": 1027,
                               "type": "function (address,address,uint256)",
                               "value": "_transfer"
                             },
@@ -1017,7 +1017,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 1362,
+                              "referencedDeclaration": 1416,
                               "type": "contract ERC20Extending",
                               "value": "this"
                             },
@@ -1089,5 +1089,5 @@
   },
   "networks": {},
   "schemaVersion": "1.0.1",
-  "updatedAt": "2017-12-20T21:19:00.177Z"
+  "updatedAt": "2017-12-21T23:40:56.023Z"
 }

@@ -8,7 +8,6 @@ contract Pauseble is TokenERC20
     event EUnpause();
 
     bool public paused = true;
-    uint public startIcoDate = 0;
 
     modifier whenNotPaused()
     {
