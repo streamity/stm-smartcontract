@@ -389,7 +389,7 @@ contract StreamityCrowdsale is Pauseble
     Ico public ICO;
 
     /*
-    * Function confirm autosell.
+    * Function confirm autosell
     *
     */
     function confirmSell(uint256 _amount) internal view
