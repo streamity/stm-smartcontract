@@ -374,6 +374,7 @@ contract StreamityCrowdsale is Pauseble
     using SafeMath for uint;
 
     uint public stage = 0;
+    uint256 public weisRaised;  // how many weis was raised on crowdsale
 
     event CrowdSaleFinished(string info);
 
@@ -386,6 +387,63 @@ contract StreamityCrowdsale is Pauseble
     }
 
     Ico public ICO;
+
+    /*
+    * Function confirm autosell
+    *
+    */
+    function confirmSell(uint256 _amount) internal view
+        returns(bool)
+    {
+        if (ICO.tokens < _amount) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /*
+    *  Make discount
+    */
+    function countDiscount(uint256 amount) internal
+        returns(uint256)
+    {
+        uint256 _amount = (amount.mul(DEC)).div(buyPrice);
+
+        if (1 == stage) {
+            _amount = _amount.add(withDiscount(_amount, ICO.discount));
+        }
+        else if (2 == stage)
+        {
+            if (now <= ICO.startDate + 1 days)
+            {
+                if (0 == ICO.discountFirstDayICO) {
+                    ICO.discountFirstDayICO = 20;
+                }
+                _amount = _amount.add(withDiscount(_amount, ICO.discountFirstDayICO));
+            }
+            else
+            {
+                _amount = _amount.add(withDiscount(_amount, ICO.discount));
+            }
+        }
+        else if (3 == stage) {
+            _amount = _amount.add(withDiscount(_amount, ICO.discount));
+        }
+
+        return _amount;
+    }
+
+    /**
+    * Function for change discount if need
+    *
+    */
+    function changeDiscount(uint8 _discount) public onlyOwner
+        returns (bool)
+    {
+        ICO = Ico (ICO.tokens, ICO.startDate, ICO.endDate, _discount, ICO.discountFirstDayICO);
+        return true;
+    }
 
     /**
     * Expanding of the functionality
@@ -427,40 +485,42 @@ contract StreamityCrowdsale is Pauseble
     }
 
     /*
+    * Seles manager
+    *
+    */
+    function paymentManager(address sender, uint256 value) internal
+    {
+        uint256 discountValue = countDiscount(value);
+        bool conf = confirmSell(discountValue);
+
+        if (conf) {
+
+            sell(sender, discountValue);
+
+            weisRaised = weisRaised.add(value);
+
+            if (now >= ICO.endDate) {
+                pauseInternal();
+                CrowdSaleFinished(crowdSaleStatus()); // if time is up
+            }
+
+        } else {
+
+            sell(sender, ICO.tokens); // sell tokens which has been accessible
+
+            weisRaised = weisRaised.add(value);
+
+            pauseInternal();
+            CrowdSaleFinished(crowdSaleStatus());  // if tokens sold
+        }
+    }
+
+    /*
     * Function for selling tokens in crowd time.
     *
     */
-    function sell(address _investor, uint256 amount) internal
+    function sell(address _investor, uint256 _amount) internal
     {
-        uint256 _amount = (amount.mul(DEC)).div(buyPrice);
-
-        if (1 == stage) {
-            _amount = _amount.add(withDiscount(_amount, ICO.discount));
-        }
-        else if (2 == stage)
-        {
-            if (now <= ICO.startDate + 1 days)
-            {
-                  if (0 == ICO.discountFirstDayICO) {
-                      ICO.discountFirstDayICO = 20;
-                  }
-
-                  _amount = _amount.add(withDiscount(_amount, ICO.discountFirstDayICO));
-            } else {
-                _amount = _amount.add(withDiscount(_amount, ICO.discount));
-            }
-        } else if (3 == stage) {
-            _amount = _amount.add(withDiscount(_amount, ICO.discount));
-        }
-
-        if (ICO.tokens < _amount)
-        {
-            CrowdSaleFinished(crowdSaleStatus());
-            pauseInternal();
-
-            revert();
-        }
-
         ICO.tokens = ICO.tokens.sub(_amount);
         avaliableSupply = avaliableSupply.sub(_amount);
 
@@ -479,7 +539,6 @@ contract StreamityCrowdsale is Pauseble
     function startCrowd(uint256 _tokens, uint _startDate, uint _endDate, uint8 _discount, uint8 _discountFirstDayICO) public onlyOwner
     {
         require(_tokens * DEC <= avaliableSupply);  // require to set correct tokens value for crowd
-        startIcoDate = _startDate;
         ICO = Ico (_tokens * DEC, _startDate, _startDate + _endDate * 1 days , _discount, _discountFirstDayICO);
         stage = stage.add(1);
         unpauseInternal();
@@ -509,12 +568,8 @@ contract StreamityCrowdsale is Pauseble
 
 contract StreamityContract is ERC20Extending, StreamityCrowdsale
 {
-    using SafeMath for uint;
-
-    uint public weisRaised;  // how many weis was raised on crowdsale
-
     /* Streamity tokens Constructor */
-    function StreamityContract() public TokenERC20(130000000, "Streamity", "STM") {} //change before send !!!
+    function StreamityContract() public TokenERC20(180000000, "Streamity", "STM") {} //change before send !!!
 
     /**
     * Function payments handler
@@ -525,22 +580,10 @@ contract StreamityContract is ERC20Extending, StreamityCrowdsale
         assert(msg.value >= 1 ether / 10);
         require(now >= ICO.startDate);
 
-        if (now >= ICO.endDate) {
-            pauseInternal();
-            CrowdSaleFinished(crowdSaleStatus());
-        }
-
-        if (0 != startIcoDate) {
-            if (now < startIcoDate) {
-                revert();
-            } else {
-                startIcoDate = 0;
-            }
-        }
-
         if (paused == false) {
-            sell(msg.sender, msg.value);
-            weisRaised = weisRaised.add(msg.value);
+            paymentManager(msg.sender, msg.value);
+        } else {
+            revert();
         }
     }
 }
